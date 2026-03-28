@@ -123,6 +123,9 @@ class Hyperparameters:
     adam_eps = float(os.environ.get("ADAM_EPS", 1e-8))
     grad_clip_norm = float(os.environ.get("GRAD_CLIP_NORM", 0.0))
     leaky_relu_slope = float(os.environ.get("LEAKY_RELU_SLOPE", 0.01))
+    ln_scale = bool(int(os.environ.get("LN_SCALE", "0")))
+    ema_enabled = bool(int(os.environ.get("EMA_ENABLED", "0")))
+    ema_decay = float(os.environ.get("EMA_DECAY", "0.997"))
 
 # -----------------------------
 # MUON OPTIMIZER 
@@ -740,6 +743,8 @@ class Block(nn.Module):
         rope_base: float,
         qk_gain_init: float,
         leaky_relu_slope: float = 0.01,
+        layer_idx: int = 0,
+        ln_scale: bool = False,
     ):
         super().__init__()
         self.attn_norm = RMSNorm()
@@ -749,13 +754,14 @@ class Block(nn.Module):
         self.attn_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.mlp_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.resid_mix = nn.Parameter(torch.stack((torch.ones(dim), torch.zeros(dim))).float())
+        self.ln_scale_factor = 1.0 / math.sqrt(layer_idx + 1) if ln_scale else 1.0
 
     def forward(self, x: Tensor, x0: Tensor) -> Tensor:
         mix = self.resid_mix.to(dtype=x.dtype)
         x = mix[0][None, None, :] * x + mix[1][None, None, :] * x0
-        attn_out = self.attn(self.attn_norm(x))
+        attn_out = self.attn(self.attn_norm(x) * self.ln_scale_factor)
         x = x + self.attn_scale.to(dtype=x.dtype)[None, None, :] * attn_out
-        x = x + self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x))
+        x = x + self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x) * self.ln_scale_factor)
         return x
 
 
@@ -774,6 +780,7 @@ class GPT(nn.Module):
         rope_base: float,
         qk_gain_init: float,
         leaky_relu_slope: float = 0.01,
+        ln_scale: bool = False,
     ):
         super().__init__()
         if logit_softcap <= 0.0:
@@ -796,6 +803,8 @@ class GPT(nn.Module):
                     rope_base,
                     qk_gain_init,
                     leaky_relu_slope,
+                    layer_idx=i,
+                    ln_scale=ln_scale,
                 )
                 for i in range(num_layers)
             ]
@@ -1059,6 +1068,7 @@ def main() -> None:
         rope_base=args.rope_base,
         qk_gain_init=args.qk_gain_init,
         leaky_relu_slope=args.leaky_relu_slope,
+        ln_scale=args.ln_scale,
     ).to(device).bfloat16()
     for module in base_model.modules():
         if isinstance(module, CastedLinear):
@@ -1066,6 +1076,11 @@ def main() -> None:
     restore_low_dim_params_to_fp32(base_model)
     compiled_model = torch.compile(base_model, dynamic=False, fullgraph=True)
     model: nn.Module = DDP(compiled_model, device_ids=[local_rank], broadcast_buffers=False) if distributed else compiled_model
+
+    # [CHANGE: EMA] Shadow copy of weights kept in fp32. Updated every step; applied before export.
+    ema_state: dict | None = None
+    if args.ema_enabled:
+        ema_state = {name: t.detach().float().clone() for name, t in base_model.state_dict().items()}
 
     # Optimizer split:
     # - token embedding (Adam) uses EMBED_LR
@@ -1282,6 +1297,16 @@ def main() -> None:
                 muon_lr = optimizer_muon.param_groups[0]["lr"]
                 for p in matrix_params:
                     p.mul_(1.0 - muon_lr * args.muon_weight_decay)
+
+        # [CHANGE: EMA] Update shadow weights with warmup-corrected decay.
+        # Early steps use a lower effective decay so EMA catches up to the real weights faster,
+        # then ramps toward the target decay as training progresses (same correction as Adam).
+        if ema_state is not None:
+            with torch.no_grad():
+                ema_decay_corrected = min(args.ema_decay, (1 + step) / (10 + step))
+                for name, param in base_model.state_dict().items():
+                    ema_state[name].mul_(ema_decay_corrected).add_(param.float(), alpha=1.0 - ema_decay_corrected)
+
         zero_grad_all()
 
         step += 1
@@ -1315,6 +1340,11 @@ def main() -> None:
     # -----------------------------
     # Save the raw state (useful for debugging/loading in PyTorch directly), then always produce
     # the compressed (int6 blocks + fp16 embed)+zlib artifact and validate the round-tripped weights.
+
+    # [CHANGE: EMA] Replace model weights with EMA shadow weights before export.
+    if ema_state is not None:
+        base_model.load_state_dict({k: v.to(base_model.state_dict()[k].dtype) for k, v in ema_state.items()})
+        log0("ema_applied: loaded ema weights for export")
 
     if master_process:
         torch.save(base_model.state_dict(), "final_model.pt")
