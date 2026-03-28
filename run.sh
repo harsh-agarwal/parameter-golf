@@ -17,27 +17,27 @@
 # so you can verify training is healthy and QAT is working before scaling up.
 # ─────────────────────────────────────────────────────────────────────────────
 
-RUN_ID=test_1gpu \
-NUM_LAYERS=9 \
-MLP_MULT=2 \
-TRAIN_SEQ_LEN=1024 \
-TRAIN_BATCH_TOKENS=524288 \
-WARMDOWN_ITERS=1200 \
-MUON_MOMENTUM=0.99 \
-MUON_MOMENTUM_WARMUP_START=0.92 \
-MUON_MOMENTUM_WARMUP_STEPS=500 \
-MATRIX_LR=0.025 \
-SCALAR_LR=0.025 \
-TIED_EMBED_LR=0.035 \
-MUON_WEIGHT_DECAY=0.04 \
-ADAM_WEIGHT_DECAY=0.04 \
-GRAD_CLIP_NORM=0.3 \
-INT6_LAYER_START=0 \
-INT6_LAYER_END=8 \
-DATA_PATH=./data/datasets/fineweb10B_sp1024/ \
-TOKENIZER_PATH=./data/tokenizers/fineweb_1024_bpe.model \
-VOCAB_SIZE=1024 \
-torchrun --standalone --nproc_per_node=1 train_gpt.py
+# RUN_ID=test_1gpu \
+# NUM_LAYERS=9 \
+# MLP_MULT=2 \
+# TRAIN_SEQ_LEN=1024 \
+# TRAIN_BATCH_TOKENS=524288 \
+# WARMDOWN_ITERS=1200 \
+# MUON_MOMENTUM=0.99 \
+# MUON_MOMENTUM_WARMUP_START=0.92 \
+# MUON_MOMENTUM_WARMUP_STEPS=500 \
+# MATRIX_LR=0.025 \
+# SCALAR_LR=0.025 \
+# TIED_EMBED_LR=0.035 \
+# MUON_WEIGHT_DECAY=0.04 \
+# ADAM_WEIGHT_DECAY=0.04 \
+# GRAD_CLIP_NORM=0.3 \
+# INT6_LAYER_START=0 \
+# INT6_LAYER_END=8 \
+# DATA_PATH=./data/datasets/fineweb10B_sp1024/ \
+# TOKENIZER_PATH=./data/tokenizers/fineweb_1024_bpe.model \
+# VOCAB_SIZE=1024 \
+# torchrun --standalone --nproc_per_node=1 train_gpt.py
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8x H100 — leaderboard submission
@@ -48,24 +48,25 @@ torchrun --standalone --nproc_per_node=1 train_gpt.py
 # export. INT6_LAYER_END=10 covers all 11 layers (0-indexed).
 # ─────────────────────────────────────────────────────────────────────────────
 
-# RUN_ID=submission_8gpu \
-# NUM_LAYERS=11 \
-# MLP_MULT=3 \
-# TRAIN_SEQ_LEN=2048 \
-# TRAIN_BATCH_TOKENS=786432 \
-# WARMDOWN_ITERS=3500 \
-# MUON_MOMENTUM=0.99 \
-# MUON_MOMENTUM_WARMUP_START=0.92 \
-# MUON_MOMENTUM_WARMUP_STEPS=1500 \
-# MATRIX_LR=0.025 \
-# SCALAR_LR=0.025 \
-# TIED_EMBED_LR=0.035 \
-# MUON_WEIGHT_DECAY=0.04 \
-# ADAM_WEIGHT_DECAY=0.04 \
-# GRAD_CLIP_NORM=0.3 \
-# INT6_LAYER_START=0 \
-# INT6_LAYER_END=10 \
-# DATA_PATH=./data/datasets/fineweb10B_sp1024/ \
-# TOKENIZER_PATH=./data/tokenizers/fineweb_1024_bpe.model \
-# VOCAB_SIZE=1024 \
-# torchrun --standalone --nproc_per_node=8 train_gpt.py
+RUN_ID=submission_8gpu \
+NUM_LAYERS=11 \
+MLP_MULT=3 \
+TRAIN_SEQ_LEN=2048 \
+TRAIN_BATCH_TOKENS=786432 \
+WARMDOWN_ITERS=3500 \
+MUON_MOMENTUM=0.99 \
+MUON_MOMENTUM_WARMUP_START=0.92 \
+MUON_MOMENTUM_WARMUP_STEPS=1500 \
+MATRIX_LR=0.025 \
+SCALAR_LR=0.025 \
+TIED_EMBED_LR=0.035 \
+MUON_WEIGHT_DECAY=0.04 \
+ADAM_WEIGHT_DECAY=0.04 \
+GRAD_CLIP_NORM=0.3 \
+INT6_LAYER_START=0 \
+INT6_LAYER_END=10 \
+DATA_PATH=./data/datasets/fineweb10B_sp1024/ \
+TOKENIZER_PATH=./data/tokenizers/fineweb_1024_bpe.model \
+VOCAB_SIZE=1024 \
+MAX_WALLCLOCK_SECONDS=1200 \
+torchrun --standalone --nproc_per_node=4 train_gpt.py
