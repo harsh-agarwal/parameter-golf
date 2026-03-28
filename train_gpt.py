@@ -131,6 +131,8 @@ class Hyperparameters:
     swa_lr_threshold = float(os.environ.get("SWA_LR_THRESHOLD", "0.2"))  # only snapshot when scale < this
     xsa_last_n = int(os.environ.get("XSA_LAST_N", "0"))   # 0=off, -1=all layers, N=last N layers
     rope_dims = int(os.environ.get("ROPE_DIMS", "0"))     # 0=full RoPE, N=partial (first N head dims)
+    bigram_vocab_size = int(os.environ.get("BIGRAM_VOCAB_SIZE", "0"))  # 0=disabled, N=hash table size
+    bigram_dim = int(os.environ.get("BIGRAM_DIM", "128"))              # bottleneck dim before projection
 
 # -----------------------------
 # MUON OPTIMIZER 
@@ -771,6 +773,49 @@ class MLP(nn.Module):
         return self.proj(x.square())
 
 
+class BigramHashEmbedding(nn.Module):
+    """Bigram context embedding added to the token embedding at the input layer.
+
+    Adjacent token pairs (t[i-1], t[i]) are hashed into a compact table and embedded,
+    giving the model cheap access to local co-occurrence patterns without a full bigram
+    matrix. Design choices:
+      - XOR of two linearly-mixed token IDs: good avalanche, order-sensitive (swap → diff hash)
+      - Bottleneck dim (bigram_dim < model_dim) keeps param count low; projected up with a
+        zero-initialized linear so the contribution starts at zero and grows as needed
+      - Learned scalar gate (init 0.05) lets the model control overall bigram influence
+      - First position has no predecessor → sentinel index (bigram_vocab_size - 1)
+    """
+    def __init__(self, bigram_vocab_size: int, bigram_dim: int, model_dim: int):
+        super().__init__()
+        self.bigram_vocab_size = bigram_vocab_size
+        self.embed = nn.Embedding(bigram_vocab_size, bigram_dim)
+        nn.init.zeros_(self.embed.weight)
+        # Project from bottleneck to model_dim; skip if dims already match.
+        self.proj = CastedLinear(bigram_dim, model_dim, bias=False) if bigram_dim != model_dim else None
+        if self.proj is not None:
+            nn.init.zeros_(self.proj.weight)
+        # Learned scale: starts small so bigram is initially a minor perturbation.
+        self.scale = nn.Parameter(torch.tensor(0.05, dtype=torch.float32))
+
+    def bigram_hash(self, tokens: Tensor) -> Tensor:
+        """Hash adjacent token pairs to embedding indices.
+        Uses XOR of two differently-scaled token IDs — order-sensitive and cheap.
+        Prime-like multipliers (36313, 27191) give good mixing across the vocab.
+        """
+        t = tokens.to(torch.int32)
+        mod = self.bigram_vocab_size - 1  # leaves index (vocab-1) as the position-0 sentinel
+        out = torch.empty_like(t)
+        out[..., 0] = mod                 # no predecessor for the first token
+        out[..., 1:] = (torch.bitwise_xor(36313 * t[..., 1:], 27191 * t[..., :-1]) % mod).long()
+        return out.long()
+
+    def forward(self, token_ids: Tensor) -> Tensor:
+        h = self.embed(self.bigram_hash(token_ids))   # [B, T, bigram_dim]
+        if self.proj is not None:
+            h = self.proj(h)                          # [B, T, model_dim]
+        return h * self.scale.to(dtype=h.dtype)
+
+
 class Block(nn.Module):
     def __init__(
         self,
@@ -822,6 +867,8 @@ class GPT(nn.Module):
         ln_scale: bool = False,
         xsa_last_n: int = 0,
         rope_dims: int = 0,
+        bigram_vocab_size: int = 0,
+        bigram_dim: int = 128,
     ):
         super().__init__()
         if logit_softcap <= 0.0:
@@ -830,6 +877,7 @@ class GPT(nn.Module):
         self.tied_embed_init_std = tied_embed_init_std
         self.logit_softcap = logit_softcap
         self.tok_emb = nn.Embedding(vocab_size, model_dim)
+        self.bigram = BigramHashEmbedding(bigram_vocab_size, bigram_dim, model_dim) if bigram_vocab_size > 0 else None
         self.num_encoder_layers = num_layers // 2
         self.num_decoder_layers = num_layers - self.num_encoder_layers
         self.num_skip_weights = min(self.num_encoder_layers, self.num_decoder_layers)
@@ -874,6 +922,8 @@ class GPT(nn.Module):
 
     def forward(self, input_ids: Tensor, target_ids: Tensor) -> Tensor:
         x = self.tok_emb(input_ids)
+        if self.bigram is not None:
+            x = x + self.bigram(input_ids)
         x = F.rms_norm(x, (x.size(-1),))
         x0 = x
         skips: list[Tensor] = []
@@ -1121,6 +1171,8 @@ def main() -> None:
         ln_scale=args.ln_scale,
         xsa_last_n=args.xsa_last_n,
         rope_dims=args.rope_dims,
+        bigram_vocab_size=args.bigram_vocab_size,
+        bigram_dim=args.bigram_dim,
     ).to(device).bfloat16()
     for module in base_model.modules():
         if isinstance(module, CastedLinear):
@@ -1157,11 +1209,21 @@ def main() -> None:
     ]
     if base_model.skip_weights.numel() > 0:
         scalar_params.append(base_model.skip_weights)
+    # [CHANGE: Bigram] Add bigram params before optimizer construction.
+    # embed.weight → token LR (same as tok_emb — it's an embedding lookup)
+    # proj.weight + scale → scalar LR (AdamW; too small for Muon)
+    if base_model.bigram is not None:
+        scalar_params.append(base_model.bigram.scale)
+        if base_model.bigram.proj is not None:
+            scalar_params.append(base_model.bigram.proj.weight)
     token_lr = args.tied_embed_lr if args.tie_embeddings else args.embed_lr
     # [CHANGE: Weight Decay] Use AdamW instead of Adam when adam_weight_decay > 0, passing wd directly.
     AdamCls = torch.optim.AdamW if args.adam_weight_decay > 0 else torch.optim.Adam
+    tok_emb_params = [base_model.tok_emb.weight]
+    if base_model.bigram is not None:
+        tok_emb_params.append(base_model.bigram.embed.weight)
     optimizer_tok = AdamCls(
-        [{"params": [base_model.tok_emb.weight], "lr": token_lr, "base_lr": token_lr}],
+        [{"params": tok_emb_params, "lr": token_lr, "base_lr": token_lr}],
         betas=(args.beta1, args.beta2),
         eps=args.adam_eps,
         weight_decay=args.adam_weight_decay,
