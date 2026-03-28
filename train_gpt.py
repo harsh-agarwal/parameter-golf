@@ -126,6 +126,11 @@ class Hyperparameters:
     ln_scale = bool(int(os.environ.get("LN_SCALE", "0")))
     ema_enabled = bool(int(os.environ.get("EMA_ENABLED", "0")))
     ema_decay = float(os.environ.get("EMA_DECAY", "0.997"))
+    swa_enabled = bool(int(os.environ.get("SWA_ENABLED", "0")))
+    swa_every = int(os.environ.get("SWA_EVERY", "50"))         # snapshot interval in steps
+    swa_lr_threshold = float(os.environ.get("SWA_LR_THRESHOLD", "0.2"))  # only snapshot when scale < this
+    xsa_last_n = int(os.environ.get("XSA_LAST_N", "0"))   # 0=off, -1=all layers, N=last N layers
+    rope_dims = int(os.environ.get("ROPE_DIMS", "0"))     # 0=full RoPE, N=partial (first N head dims)
 
 # -----------------------------
 # MUON OPTIMIZER 
@@ -638,9 +643,11 @@ def restore_low_dim_params_to_fp32(module: nn.Module) -> None:
 
 class Rotary(nn.Module):
     # Caches cos/sin tables per sequence length on the current device.
-    def __init__(self, dim: int, base: float = 10000.0):
+    # rope_dims=0 means full head_dim; rope_dims=N applies RoPE to only the first N dims.
+    def __init__(self, dim: int, base: float = 10000.0, rope_dims: int = 0):
         super().__init__()
-        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2, dtype=torch.float32) / dim))
+        self.rope_dims = rope_dims if rope_dims > 0 else dim
+        inv_freq = 1.0 / (base ** (torch.arange(0, self.rope_dims, 2, dtype=torch.float32) / self.rope_dims))
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         self._seq_len_cached = 0
         self._cos_cached: Tensor | None = None
@@ -661,7 +668,15 @@ class Rotary(nn.Module):
         return self._cos_cached.to(dtype=dtype), self._sin_cached.to(dtype=dtype)
 
 
-def apply_rotary_emb(x: Tensor, cos: Tensor, sin: Tensor) -> Tensor:
+def apply_rotary_emb(x: Tensor, cos: Tensor, sin: Tensor, rope_dims: int = 0) -> Tensor:
+    if rope_dims > 0 and rope_dims < x.size(-1):
+        # Partial RoPE: rotate only first rope_dims head dimensions, pass the rest through unchanged.
+        x_rope, x_pass = x[..., :rope_dims], x[..., rope_dims:]
+        half = rope_dims // 2
+        x1, x2 = x_rope[..., :half], x_rope[..., half:]
+        x_rope = torch.cat((x1 * cos + x2 * sin, x1 * (-sin) + x2 * cos), dim=-1)
+        return torch.cat((x_rope, x_pass), dim=-1)
+    # Full RoPE (default).
     half = x.size(-1) // 2
     x1, x2 = x[..., :half], x[..., half:]
     return torch.cat((x1 * cos + x2 * sin, x1 * (-sin) + x2 * cos), dim=-1)
@@ -675,6 +690,7 @@ class CausalSelfAttention(nn.Module):
         num_kv_heads: int,
         rope_base: float,
         qk_gain_init: float,
+        rope_dims: int = 0,
     ):
         super().__init__()
         if dim % num_heads != 0:
@@ -693,7 +709,27 @@ class CausalSelfAttention(nn.Module):
         self.proj = CastedLinear(dim, dim, bias=False)
         self.proj._zero_init = True
         self.q_gain = nn.Parameter(torch.full((num_heads,), qk_gain_init, dtype=torch.float32))
-        self.rotary = Rotary(self.head_dim, base=rope_base)
+        self.rope_dims = rope_dims
+        self.rotary = Rotary(self.head_dim, base=rope_base, rope_dims=rope_dims)
+        self.use_xsa = False  # enabled externally by GPT for selected layers
+
+    def _xsa_efficient(self, y: Tensor, v: Tensor) -> Tensor:
+        """Exclusive Self-Attention: subtract the self-value projection from attention output.
+        Removes each token's own-value component, focusing the layer on cross-token information.
+        y: [B, H, T, D],  v: [B, Hkv, T, D]  (head-first layout from SDPA)
+
+        Uses the efficient GQA-aware reshape (no repeat_interleave): Q heads are grouped by their
+        shared KV head, the projection is computed once per KV head, then broadcast across the group.
+        eps=1e-6 guards normalize() against near-zero v vectors in bfloat16.
+        """
+        B, H, T, D = y.shape
+        Hkv = v.size(1)
+        group = H // Hkv
+        y_g = y.reshape(B, Hkv, group, T, D)                       # [B, Hkv, group, T, D]
+        vn = F.normalize(v.float(), dim=-1, eps=1e-6).to(y.dtype)  # [B, Hkv,       T, D]
+        vn = vn.unsqueeze(2)                                         # [B, Hkv, 1,    T, D]
+        proj = (y_g * vn).sum(dim=-1, keepdim=True) * vn
+        return (y_g - proj).reshape(B, H, T, D)
 
     def forward(self, x: Tensor) -> Tensor:
         bsz, seqlen, dim = x.shape
@@ -703,8 +739,8 @@ class CausalSelfAttention(nn.Module):
         q = F.rms_norm(q, (q.size(-1),))
         k = F.rms_norm(k, (k.size(-1),))
         cos, sin = self.rotary(seqlen, x.device, q.dtype)
-        q = apply_rotary_emb(q, cos, sin)
-        k = apply_rotary_emb(k, cos, sin)
+        q = apply_rotary_emb(q, cos, sin, self.rope_dims)
+        k = apply_rotary_emb(k, cos, sin, self.rope_dims)
         q = q * self.q_gain.to(dtype=q.dtype)[None, :, None, None]
         y = F.scaled_dot_product_attention(
             q,
@@ -714,6 +750,8 @@ class CausalSelfAttention(nn.Module):
             is_causal=True,
             enable_gqa=(self.num_kv_heads != self.num_heads),
         )
+        if self.use_xsa:
+            y = self._xsa_efficient(y, v)
         y = y.transpose(1, 2).contiguous().reshape(bsz, seqlen, dim)
         return self.proj(y)
 
@@ -745,11 +783,12 @@ class Block(nn.Module):
         leaky_relu_slope: float = 0.01,
         layer_idx: int = 0,
         ln_scale: bool = False,
+        rope_dims: int = 0,
     ):
         super().__init__()
         self.attn_norm = RMSNorm()
         self.mlp_norm = RMSNorm()
-        self.attn = CausalSelfAttention(dim, num_heads, num_kv_heads, rope_base, qk_gain_init)
+        self.attn = CausalSelfAttention(dim, num_heads, num_kv_heads, rope_base, qk_gain_init, rope_dims)
         self.mlp = MLP(dim, mlp_mult, leaky_relu_slope)
         self.attn_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.mlp_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
@@ -781,6 +820,8 @@ class GPT(nn.Module):
         qk_gain_init: float,
         leaky_relu_slope: float = 0.01,
         ln_scale: bool = False,
+        xsa_last_n: int = 0,
+        rope_dims: int = 0,
     ):
         super().__init__()
         if logit_softcap <= 0.0:
@@ -805,6 +846,7 @@ class GPT(nn.Module):
                     leaky_relu_slope,
                     layer_idx=i,
                     ln_scale=ln_scale,
+                    rope_dims=rope_dims,
                 )
                 for i in range(num_layers)
             ]
@@ -813,6 +855,14 @@ class GPT(nn.Module):
         self.lm_head = None if tie_embeddings else CastedLinear(model_dim, vocab_size, bias=False)
         if self.lm_head is not None:
             self.lm_head._zero_init = True
+
+        # [CHANGE: XSA] Enable exclusive self-attention on selected layers.
+        # xsa_last_n=-1 → all layers, xsa_last_n=N → last N layers, 0 → disabled.
+        if xsa_last_n != 0:
+            xsa_start = 0 if xsa_last_n == -1 else max(0, num_layers - xsa_last_n)
+            for block in self.blocks[xsa_start:]:
+                block.attn.use_xsa = True
+
         self._init_weights()
 
     def _init_weights(self) -> None:
@@ -1069,6 +1119,8 @@ def main() -> None:
         qk_gain_init=args.qk_gain_init,
         leaky_relu_slope=args.leaky_relu_slope,
         ln_scale=args.ln_scale,
+        xsa_last_n=args.xsa_last_n,
+        rope_dims=args.rope_dims,
     ).to(device).bfloat16()
     for module in base_model.modules():
         if isinstance(module, CastedLinear):
@@ -1081,6 +1133,11 @@ def main() -> None:
     ema_state: dict | None = None
     if args.ema_enabled:
         ema_state = {name: t.detach().float().clone() for name, t in base_model.state_dict().items()}
+
+    # [CHANGE: SWA] Accumulates equal-weight snapshots during low-LR phase; averaged at export.
+    # Finds the flat basin center that EMA's recency bias can miss.
+    swa_state: dict | None = None
+    swa_count: int = 0
 
     # Optimizer split:
     # - token embedding (Adam) uses EMBED_LR
@@ -1307,6 +1364,19 @@ def main() -> None:
                 for name, param in base_model.state_dict().items():
                     ema_state[name].mul_(ema_decay_corrected).add_(param.float(), alpha=1.0 - ema_decay_corrected)
 
+        # [CHANGE: SWA] Accumulate equal-weight snapshots during the low-LR warmdown phase.
+        # Only snapshots taken when scale < swa_lr_threshold (deep into warmdown) are included,
+        # so the average reflects the flat-basin region, not noisy high-LR training.
+        if args.swa_enabled and scale < args.swa_lr_threshold and step % args.swa_every == 0:
+            with torch.no_grad():
+                if swa_state is None:
+                    swa_state = {name: param.detach().float().clone() for name, param in base_model.state_dict().items()}
+                    swa_count = 1
+                else:
+                    for name, param in base_model.state_dict().items():
+                        swa_state[name].add_(param.float())
+                    swa_count += 1
+
         zero_grad_all()
 
         step += 1
@@ -1341,10 +1411,16 @@ def main() -> None:
     # Save the raw state (useful for debugging/loading in PyTorch directly), then always produce
     # the compressed (int6 blocks + fp16 embed)+zlib artifact and validate the round-tripped weights.
 
-    # [CHANGE: EMA] Replace model weights with EMA shadow weights before export.
-    if ema_state is not None:
+    # [CHANGE: SWA + EMA] Choose which averaged weights to export.
+    # SWA takes precedence when it accumulated snapshots (it targets the flat-basin center).
+    # EMA is the fallback — it's always running but is recency-biased toward the final steps.
+    if swa_state is not None and swa_count > 0:
+        averaged = {k: (v / swa_count).to(base_model.state_dict()[k].dtype) for k, v in swa_state.items()}
+        base_model.load_state_dict(averaged)
+        log0(f"swa_applied: averaged {swa_count} snapshots for export")
+    elif ema_state is not None:
         base_model.load_state_dict({k: v.to(base_model.state_dict()[k].dtype) for k, v in ema_state.items()})
-        log0("ema_applied: loaded ema weights for export")
+        log0("ema_applied: loaded ema weights for export (swa had no snapshots)")
 
     if master_process:
         torch.save(base_model.state_dict(), "final_model.pt")
