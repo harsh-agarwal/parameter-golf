@@ -40,15 +40,18 @@
 # torchrun --standalone --nproc_per_node=1 train_gpt.py
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 8x H100 — leaderboard submission
+# 4x GPU — proxy for 8xH100 leaderboard run (double the wall-clock time)
 #
-# At ~83ms/step on 8xH100 you get ~7200 steps in 600s. WARMDOWN_ITERS=3500
-# means warmdown starts at ~3700 steps, QAT activates at ~15% of peak LR
-# (deep into warmdown), giving the model ~500 steps of QAT adaptation before
-# export. INT6_LAYER_END=10 covers all 11 layers (0-indexed).
+# At ~212ms/step on 4 GPUs you get ~5660 steps in 1200s. WARMDOWN_ITERS=2700
+# means warmdown starts at ~2960 steps (48% of run — same proportion as 8-GPU).
+# QAT activates at ~15% of peak LR, leaving ~524 steps of QAT + ~10 SWA shots.
+# INT6_LAYER_END=10 covers all 11 layers (0-indexed).
+#
+# To submit on 8xH100: change nproc_per_node=8, MAX_WALLCLOCK_SECONDS=600,
+#   WARMDOWN_ITERS=3500, MUON_MOMENTUM_WARMUP_STEPS=1500 (same step counts)
 # ─────────────────────────────────────────────────────────────────────────────
 
-RUN_ID=submission_8gpu \
+RUN_ID=submission_4gpu \
 NUM_LAYERS=11 \
 MLP_MULT=3 \
 LEAKY_RELU_SLOPE=0.5 \
@@ -62,7 +65,7 @@ ROPE_DIMS=16 \
 BIGRAM_VOCAB_SIZE=1536 \
 TRAIN_SEQ_LEN=2048 \
 TRAIN_BATCH_TOKENS=786432 \
-WARMDOWN_ITERS=3500 \
+WARMDOWN_ITERS=2700 \
 MUON_MOMENTUM=0.99 \
 MUON_MOMENTUM_WARMUP_START=0.92 \
 MUON_MOMENTUM_WARMUP_STEPS=1500 \

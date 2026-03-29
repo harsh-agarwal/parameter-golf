@@ -141,79 +141,151 @@ class Hyperparameters:
 # As borrowed from modded-nanogpt
 # Background on Muon: https://kellerjordan.github.io/posts/muon/
 
-def zeropower_via_newtonschulz5(G: Tensor, steps: int = 10, eps: float = 1e-7) -> Tensor:
-    # Orthogonalize a 2D update matrix with a fast Newton-Schulz iteration.
-    # Muon uses this to normalize matrix-shaped gradients before applying them.
+def zeropower_via_newtonschulz5(G: Tensor, steps: int = 5, eps: float = 1e-7) -> Tensor:
+    """Batched Newton-Schulz orthogonalization. G: (B,M,N) or (M,N)."""
     a, b, c = (3.4445, -4.7750, 2.0315)
+    was_2d = G.ndim == 2
+    if was_2d:
+        G = G.unsqueeze(0)
     X = G.bfloat16()
-    X /= X.norm() + eps
-    transposed = G.size(0) > G.size(1)
+    transposed = X.size(-2) > X.size(-1)
     if transposed:
-        X = X.T
+        X = X.mT
+    X = X / (X.norm(dim=(-2, -1), keepdim=True) + eps)
     for _ in range(steps):
-        A = X @ X.T
-        B = b * A + c * A @ A
+        A = X @ X.mT
+        B = b * A + c * (A @ A)
         X = a * X + B @ X
-    return X.T if transposed else X
+    if transposed:
+        X = X.mT
+    if was_2d:
+        X = X.squeeze(0)
+    return X
 
 
 class Muon(torch.optim.Optimizer):
-    def __init__(self, params, lr: float, momentum: float, backend_steps: int, nesterov: bool = True):
+    """Parallel Muon: post-backward reduce-scatter → local NS5 → all-gather.
+    Banks are sharded along dim-0 preserving per-matrix shape for correct batched NS5.
+    """
+    def __init__(self, params, lr: float, momentum: float, backend_steps: int,
+                 nesterov: bool = True, weight_decay: float = 0.0):
         super().__init__(
             params,
-            dict(lr=lr, momentum=momentum, backend_steps=backend_steps, nesterov=nesterov),
+            dict(lr=lr, momentum=momentum, backend_steps=backend_steps,
+                 nesterov=nesterov, weight_decay=weight_decay),
         )
+        self._built = False
+
+    def _build(self):
+        self._distributed = dist.is_available() and dist.is_initialized()
+        self._world_size = dist.get_world_size() if self._distributed else 1
+        ws = self._world_size
+        self._bank_meta = []
+        for group in self.param_groups:
+            for p in group["params"]:
+                B = p.shape[0]
+                padded_B = ((B + ws - 1) // ws) * ws
+                shard_B = padded_B // ws
+                tail = p.shape[1:]   # e.g. (512, 512) for qo_bank rows
+                dev = p.device
+                self._bank_meta.append({
+                    "p": p,
+                    "B": B,
+                    "padded_grad":  torch.zeros(padded_B, *tail, device=dev, dtype=torch.bfloat16),
+                    "shard":        torch.zeros(shard_B,  *tail, device=dev, dtype=torch.bfloat16),
+                    "shard_mom":    torch.zeros(shard_B,  *tail, device=dev, dtype=torch.bfloat16),
+                    "full_update":  torch.zeros(padded_B, *tail, device=dev, dtype=torch.bfloat16),
+                    "scale": max(1, p.shape[-2] / p.shape[-1]) ** 0.5,
+                })
+        # process largest banks first so biggest AG overlaps smallest NS5
+        self._bank_meta.sort(key=lambda m: -m["p"].numel())
+        self._built = True
+
+    def launch_reduce_scatters(self):
+        """Phase 1: async reduce-scatter for every bank (called right after backward)."""
+        if not self._built:
+            self._build()
+        if not self._distributed:
+            return
+        self._rs_futures = []
+        for m in self._bank_meta:
+            p = m["p"]
+            if p.grad is None:
+                self._rs_futures.append(None)
+                continue
+            pg = m["padded_grad"]
+            pg[:m["B"]].copy_(p.grad.bfloat16())
+            if pg.shape[0] > m["B"]:
+                pg[m["B"]:].zero_()
+            fut = dist.reduce_scatter_tensor(m["shard"], pg, op=dist.ReduceOp.AVG, async_op=True)
+            self._rs_futures.append(fut)
 
     @torch.no_grad()
     def step(self, closure=None):
-        loss = None
-        if closure is not None:
-            with torch.enable_grad():
-                loss = closure()
-
-        distributed = dist.is_available() and dist.is_initialized()
-        world_size = dist.get_world_size() if distributed else 1
-        rank = dist.get_rank() if distributed else 0
+        """Phase 3: wait RS → NS5 on shard (preserving per-matrix shape) → all-gather."""
+        if not self._built:
+            self._build()
 
         for group in self.param_groups:
-            params = group["params"]
-            if not params:
-                continue
-            lr = group["lr"]
-            momentum = group["momentum"]
-            backend_steps = group["backend_steps"]
-            nesterov = group["nesterov"]
+            lr          = group["lr"]
+            momentum    = group["momentum"]
+            steps       = group["backend_steps"]
+            nesterov    = group["nesterov"]
+            wd          = group.get("weight_decay", 0.0)
 
-            total_params = sum(int(p.numel()) for p in params)
-            updates_flat = torch.zeros(total_params, device=params[0].device, dtype=torch.bfloat16)
+            sharded = self._distributed and hasattr(self, "_rs_futures")
+            prev_ag_handle = None
+            prev_m = None
 
-            curr = 0
-            for i, p in enumerate(params):
-                if i % world_size == rank and p.grad is not None:
-                    g = p.grad
+            for i, m in enumerate(self._bank_meta):
+                p = m["p"]
+                if p.grad is None:
+                    continue
+
+                # apply previous bank's update now that its AG is done
+                if prev_ag_handle is not None:
+                    prev_ag_handle.wait()
+                    pp = prev_m["p"]
+                    upd = prev_m["full_update"][:prev_m["B"]]
+                    if wd > 0.0:
+                        pp.data.mul_(1.0 - lr * wd)
+                    pp.add_(upd.to(dtype=pp.dtype), alpha=-lr * prev_m["scale"])
+
+                if sharded and self._rs_futures[i] is not None:
+                    self._rs_futures[i].wait()
+                    g   = m["shard"]      # [shard_B, M, N] — 3-D, correct shape for batched NS5
+                    buf = m["shard_mom"]
+                else:
+                    g = p.grad.bfloat16()
                     state = self.state[p]
                     if "momentum_buffer" not in state:
                         state["momentum_buffer"] = torch.zeros_like(g)
                     buf = state["momentum_buffer"]
-                    buf.mul_(momentum).add_(g)
-                    if nesterov:
-                        g = g.add(buf, alpha=momentum)
-                    g = zeropower_via_newtonschulz5(g, steps=backend_steps)
-                    # Scale correction from Muon reference implementations.
-                    g *= max(1, g.size(0) / g.size(1)) ** 0.5
-                    updates_flat[curr : curr + p.numel()] = g.reshape(-1)
-                curr += p.numel()
 
-            if distributed:
-                dist.all_reduce(updates_flat, op=dist.ReduceOp.SUM)
+                buf.mul_(momentum).add_(g)
+                update = g.add(buf, alpha=momentum) if nesterov else buf.clone()
+                update = zeropower_via_newtonschulz5(update, steps=steps)
 
-            curr = 0
-            for p in params:
-                g = updates_flat[curr : curr + p.numel()].view_as(p).to(dtype=p.dtype)
-                p.add_(g, alpha=-lr)
-                curr += p.numel()
+                if sharded:
+                    prev_ag_handle = dist.all_gather_into_tensor(
+                        m["full_update"], update, async_op=True)
+                    prev_m = m
+                else:
+                    if wd > 0.0:
+                        p.data.mul_(1.0 - lr * wd)
+                    p.add_(update.to(dtype=p.dtype), alpha=-lr * m["scale"])
 
-        return loss
+            # flush last bank
+            if prev_ag_handle is not None:
+                prev_ag_handle.wait()
+                pp = prev_m["p"]
+                upd = prev_m["full_update"][:prev_m["B"]]
+                if wd > 0.0:
+                    pp.data.mul_(1.0 - lr * wd)
+                pp.add_(upd.to(dtype=pp.dtype), alpha=-lr * prev_m["scale"])
+
+            if hasattr(self, "_rs_futures"):
+                del self._rs_futures
 
 
 # -----------------------------
@@ -417,6 +489,37 @@ def quantize_float_tensor_int6(t: Tensor) -> tuple[Tensor, Tensor]:
 # [CHANGE: Int6 Quantization + FP16 Embeddings] Extended signature accepts two new options:
 #   fp16_embed       — save tok_emb.weight as fp16 instead of quantizing it (preserves embedding quality)
 #   int6_layer_start / int6_layer_end — layer index range to quantize at int6 instead of int8
+_BANK_NAMES = ("qo_bank", "kv_bank", "mlp_up_bank", "mlp_down_bank")
+
+def unbank_state_dict(state_dict: dict, num_layers: int) -> dict:
+    """Expand bank tensors into per-layer block keys so the quantizer can find them."""
+    out = {k: v for k, v in state_dict.items() if not any(k.startswith(b) for b in _BANK_NAMES)}
+    for i in range(num_layers):
+        out[f"blocks.{i}.attn.q.weight"] = state_dict["qo_bank"][2 * i]
+        out[f"blocks.{i}.attn.o.weight"] = state_dict["qo_bank"][2 * i + 1]
+        out[f"blocks.{i}.attn.k.weight"] = state_dict["kv_bank"][2 * i]
+        out[f"blocks.{i}.attn.v.weight"] = state_dict["kv_bank"][2 * i + 1]
+        out[f"blocks.{i}.mlp.fc.weight"]   = state_dict["mlp_up_bank"][i]
+        out[f"blocks.{i}.mlp.proj.weight"] = state_dict["mlp_down_bank"][i]
+    return out
+
+def rebank_state_dict(state_dict: dict, num_layers: int) -> dict:
+    """Reverse of unbank: collect per-layer block weight keys back into bank tensors."""
+    per_layer_keys = {
+        f"blocks.{i}.{suffix}"
+        for i in range(num_layers)
+        for suffix in ("attn.q.weight", "attn.o.weight", "attn.k.weight",
+                       "attn.v.weight", "mlp.fc.weight", "mlp.proj.weight")
+    }
+    out = {k: v for k, v in state_dict.items() if k not in per_layer_keys}
+    out["qo_bank"] = torch.stack([t for i in range(num_layers) for t in (
+        state_dict[f"blocks.{i}.attn.q.weight"], state_dict[f"blocks.{i}.attn.o.weight"])])
+    out["kv_bank"] = torch.stack([t for i in range(num_layers) for t in (
+        state_dict[f"blocks.{i}.attn.k.weight"], state_dict[f"blocks.{i}.attn.v.weight"])])
+    out["mlp_up_bank"]   = torch.stack([state_dict[f"blocks.{i}.mlp.fc.weight"]   for i in range(num_layers)])
+    out["mlp_down_bank"] = torch.stack([state_dict[f"blocks.{i}.mlp.proj.weight"] for i in range(num_layers)])
+    return out
+
 def quantize_state_dict_int8(
     state_dict: dict[str, Tensor],
     fp16_embed: bool = False,
@@ -704,12 +807,6 @@ class CausalSelfAttention(nn.Module):
         self.head_dim = dim // num_heads
         if self.head_dim % 2 != 0:
             raise ValueError("head_dim must be even for RoPE")
-        kv_dim = self.num_kv_heads * self.head_dim
-        self.c_q = CastedLinear(dim, dim, bias=False)
-        self.c_k = CastedLinear(dim, kv_dim, bias=False)
-        self.c_v = CastedLinear(dim, kv_dim, bias=False)
-        self.proj = CastedLinear(dim, dim, bias=False)
-        self.proj._zero_init = True
         self.q_gain = nn.Parameter(torch.full((num_heads,), qk_gain_init, dtype=torch.float32))
         self.rope_dims = rope_dims
         self.rotary = Rotary(self.head_dim, base=rope_base, rope_dims=rope_dims)
@@ -733,11 +830,12 @@ class CausalSelfAttention(nn.Module):
         proj = (y_g * vn).sum(dim=-1, keepdim=True) * vn
         return (y_g - proj).reshape(B, H, T, D)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor, q_w: Tensor, k_w: Tensor, v_w: Tensor, o_w: Tensor) -> Tensor:
         bsz, seqlen, dim = x.shape
-        q = self.c_q(x).reshape(bsz, seqlen, self.num_heads, self.head_dim).transpose(1, 2)
-        k = self.c_k(x).reshape(bsz, seqlen, self.num_kv_heads, self.head_dim).transpose(1, 2)
-        v = self.c_v(x).reshape(bsz, seqlen, self.num_kv_heads, self.head_dim).transpose(1, 2)
+        xd = x.dtype
+        q = F.linear(x, q_w.to(xd)).reshape(bsz, seqlen, self.num_heads, self.head_dim).transpose(1, 2)
+        k = F.linear(x, k_w.to(xd)).reshape(bsz, seqlen, self.num_kv_heads, self.head_dim).transpose(1, 2)
+        v = F.linear(x, v_w.to(xd)).reshape(bsz, seqlen, self.num_kv_heads, self.head_dim).transpose(1, 2)
         q = F.rms_norm(q, (q.size(-1),))
         k = F.rms_norm(k, (k.size(-1),))
         cos, sin = self.rotary(seqlen, x.device, q.dtype)
@@ -745,32 +843,24 @@ class CausalSelfAttention(nn.Module):
         k = apply_rotary_emb(k, cos, sin, self.rope_dims)
         q = q * self.q_gain.to(dtype=q.dtype)[None, :, None, None]
         y = F.scaled_dot_product_attention(
-            q,
-            k,
-            v,
-            attn_mask=None,
-            is_causal=True,
-            enable_gqa=(self.num_kv_heads != self.num_heads),
+            q, k, v, attn_mask=None, is_causal=True, enable_gqa=(self.num_kv_heads != self.num_heads),
         )
         if self.use_xsa:
             y = self._xsa_efficient(y, v)
         y = y.transpose(1, 2).contiguous().reshape(bsz, seqlen, dim)
-        return self.proj(y)
+        return F.linear(y, o_w.to(xd))
 
 
 class MLP(nn.Module):
-    # leaky relu^2 MLP
-    def __init__(self, dim: int, mlp_mult: int, leaky_relu_slope: float = 0.01):
+    # leaky relu^2 MLP — weights injected as args from GPT's parameter banks
+    def __init__(self, leaky_relu_slope: float = 0.01):
         super().__init__()
-        hidden = mlp_mult * dim
-        self.fc = CastedLinear(dim, hidden, bias=False)
-        self.proj = CastedLinear(hidden, dim, bias=False)
-        self.proj._zero_init = True
         self.leaky_relu_slope = leaky_relu_slope
 
-    def forward(self, x: Tensor) -> Tensor:
-        x = F.leaky_relu(self.fc(x), negative_slope=self.leaky_relu_slope)
-        return self.proj(x.square())
+    def forward(self, x: Tensor, up_w: Tensor, dn_w: Tensor) -> Tensor:
+        xd = x.dtype
+        x = F.leaky_relu(F.linear(x, up_w.to(xd)), negative_slope=self.leaky_relu_slope)
+        return F.linear(x.square(), dn_w.to(xd))
 
 
 class BigramHashEmbedding(nn.Module):
@@ -822,7 +912,6 @@ class Block(nn.Module):
         dim: int,
         num_heads: int,
         num_kv_heads: int,
-        mlp_mult: int,
         rope_base: float,
         qk_gain_init: float,
         leaky_relu_slope: float = 0.01,
@@ -834,19 +923,29 @@ class Block(nn.Module):
         self.attn_norm = RMSNorm()
         self.mlp_norm = RMSNorm()
         self.attn = CausalSelfAttention(dim, num_heads, num_kv_heads, rope_base, qk_gain_init, rope_dims)
-        self.mlp = MLP(dim, mlp_mult, leaky_relu_slope)
+        self.mlp = MLP(leaky_relu_slope)
         self.attn_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.mlp_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.resid_mix = nn.Parameter(torch.stack((torch.ones(dim), torch.zeros(dim))).float())
         self.ln_scale_factor = 1.0 / math.sqrt(layer_idx + 1) if ln_scale else 1.0
 
-    def forward(self, x: Tensor, x0: Tensor) -> Tensor:
+    def forward(self, x: Tensor, x0: Tensor, q_w: Tensor, k_w: Tensor, v_w: Tensor, o_w: Tensor, up_w: Tensor, dn_w: Tensor) -> Tensor:
         mix = self.resid_mix.to(dtype=x.dtype)
         x = mix[0][None, None, :] * x + mix[1][None, None, :] * x0
-        attn_out = self.attn(self.attn_norm(x) * self.ln_scale_factor)
+        attn_out = self.attn(self.attn_norm(x) * self.ln_scale_factor, q_w, k_w, v_w, o_w)
         x = x + self.attn_scale.to(dtype=x.dtype)[None, None, :] * attn_out
-        x = x + self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x) * self.ln_scale_factor)
+        x = x + self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x) * self.ln_scale_factor, up_w, dn_w)
         return x
+
+
+def _fake_quant_int6(w: Tensor) -> Tensor:
+    """STE int6 fake-quantization for parameter-bank weights (64 levels, per-row scale)."""
+    wf = w.float()
+    scale = wf.abs().amax(dim=-1, keepdim=True).clamp_min(1e-12) / 127.0
+    q = (wf / scale).round()
+    q = (q / 4).round().clamp(-32, 31) * 4
+    w_q = (q * scale).to(w.dtype)
+    return w + (w_q - w).detach()   # STE: quantized forward, full-precision gradient
 
 
 class GPT(nn.Module):
@@ -882,13 +981,20 @@ class GPT(nn.Module):
         self.num_decoder_layers = num_layers - self.num_encoder_layers
         self.num_skip_weights = min(self.num_encoder_layers, self.num_decoder_layers)
         self.skip_weights = nn.Parameter(torch.ones(self.num_skip_weights, model_dim, dtype=torch.float32))
+        kv_dim = (num_kv_heads * model_dim) // num_heads
+        mlp_dim = mlp_mult * model_dim
+        # [CHANGE: Parameter Banking] Contiguous weight banks for all attention/MLP matrices.
+        # Managed by Parallel Muon with RS/AG; sliced per-layer in forward.
+        self.qo_bank       = nn.Parameter(torch.empty(2 * num_layers, model_dim, model_dim))
+        self.kv_bank       = nn.Parameter(torch.empty(2 * num_layers, kv_dim,    model_dim))
+        self.mlp_up_bank   = nn.Parameter(torch.empty(num_layers,     mlp_dim,   model_dim))
+        self.mlp_down_bank = nn.Parameter(torch.empty(num_layers,     model_dim, mlp_dim))
         self.blocks = nn.ModuleList(
             [
                 Block(
                     model_dim,
                     num_heads,
                     num_kv_heads,
-                    mlp_mult,
                     rope_base,
                     qk_gain_init,
                     leaky_relu_slope,
@@ -905,12 +1011,12 @@ class GPT(nn.Module):
             self.lm_head._zero_init = True
 
         # [CHANGE: XSA] Enable exclusive self-attention on selected layers.
-        # xsa_last_n=-1 → all layers, xsa_last_n=N → last N layers, 0 → disabled.
         if xsa_last_n != 0:
             xsa_start = 0 if xsa_last_n == -1 else max(0, num_layers - xsa_last_n)
             for block in self.blocks[xsa_start:]:
                 block.attn.use_xsa = True
 
+        self._qat_active = False  # set True at export time to enable fake-quant in forward
         self._init_weights()
 
     def _init_weights(self) -> None:
@@ -919,6 +1025,24 @@ class GPT(nn.Module):
         for module in self.modules():
             if isinstance(module, nn.Linear) and getattr(module, "_zero_init", False):
                 nn.init.zeros_(module.weight)
+        # Q/K/V/up: kaiming (1/sqrt(in_features)); O/down: zero (residual stream start near zero)
+        std = self.qo_bank.size(-1) ** -0.5
+        nn.init.normal_(self.qo_bank, std=std)
+        self.qo_bank.data[1::2].zero_()          # O projections → zero init
+        nn.init.normal_(self.kv_bank, std=std)
+        nn.init.normal_(self.mlp_up_bank, std=std)
+        self.mlp_down_bank.data.zero_()           # down projections → zero init
+
+    def _get_weights(self, i: int):
+        """Slice per-layer weight tensors from banks, applying QAT fake-quant if active."""
+        q_w, o_w = self.qo_bank[2*i], self.qo_bank[2*i+1]
+        k_w, v_w = self.kv_bank[2*i], self.kv_bank[2*i+1]
+        up_w, dn_w = self.mlp_up_bank[i], self.mlp_down_bank[i]
+        if self._qat_active:
+            q_w, o_w = _fake_quant_int6(q_w), _fake_quant_int6(o_w)
+            k_w, v_w = _fake_quant_int6(k_w), _fake_quant_int6(v_w)
+            up_w, dn_w = _fake_quant_int6(up_w), _fake_quant_int6(dn_w)
+        return q_w, k_w, v_w, o_w, up_w, dn_w
 
     def forward(self, input_ids: Tensor, target_ids: Tensor) -> Tensor:
         x = self.tok_emb(input_ids)
@@ -928,14 +1052,15 @@ class GPT(nn.Module):
         x0 = x
         skips: list[Tensor] = []
 
-        # First half stores skips; second half reuses them in reverse order.
-        for i in range(self.num_encoder_layers):
-            x = self.blocks[i](x, x0)
+        ne = self.num_encoder_layers
+        for i in range(ne):
+            x = self.blocks[i](x, x0, *self._get_weights(i))
             skips.append(x)
-        for i in range(self.num_decoder_layers):
+        for j in range(self.num_decoder_layers):
+            i = ne + j
             if skips:
-                x = x + self.skip_weights[i].to(dtype=x.dtype)[None, None, :] * skips.pop()
-            x = self.blocks[self.num_encoder_layers + i](x, x0)
+                x = x + self.skip_weights[j].to(dtype=x.dtype)[None, None, :] * skips.pop()
+            x = self.blocks[i](x, x0, *self._get_weights(i))
 
         x = self.final_norm(x).reshape(-1, x.size(-1))
         targets = target_ids.reshape(-1)
@@ -962,17 +1087,21 @@ class GPT(nn.Module):
 def forward_logits(model: nn.Module, input_ids: Tensor) -> Tensor:
     """Forward pass returning full [batch, seq, vocab] logits (used by sliding window eval)."""
     x = model.tok_emb(input_ids)
+    if model.bigram is not None:
+        x = x + model.bigram(input_ids)
     x = F.rms_norm(x, (x.size(-1),))
     x0 = x
     skips: list[Tensor] = []
-    for i in range(model.num_encoder_layers):
-        x = model.blocks[i](x, x0)
+    ne = model.num_encoder_layers
+    for i in range(ne):
+        x = model.blocks[i](x, x0, *model._get_weights(i))
         skips.append(x)
-    for i in range(model.num_decoder_layers):
+    for j in range(model.num_decoder_layers):
+        i = ne + j
         if skips:
-            x = x + model.skip_weights[i].to(dtype=x.dtype)[None, None, :] * skips.pop()
-        x = model.blocks[model.num_encoder_layers + i](x, x0)
-    x = model.final_norm(x)                          # [batch, seq, dim]
+            x = x + model.skip_weights[j].to(dtype=x.dtype)[None, None, :] * skips.pop()
+        x = model.blocks[i](x, x0, *model._get_weights(i))
+    x = model.final_norm(x)
     if model.tie_embeddings:
         logits_proj = F.linear(x, model.tok_emb.weight)
     else:
@@ -1179,7 +1308,9 @@ def main() -> None:
             module.float()
     restore_low_dim_params_to_fp32(base_model)
     compiled_model = torch.compile(base_model, dynamic=False, fullgraph=True)
-    model: nn.Module = DDP(compiled_model, device_ids=[local_rank], broadcast_buffers=False) if distributed else compiled_model
+    # [CHANGE: Parallel Muon] Banks use RS/AG instead of DDP all-reduce; remove DDP wrapper.
+    # Small/scalar params are all-reduced manually after backward (see training loop).
+    model: nn.Module = compiled_model
 
     # [CHANGE: EMA] Shadow copy of weights kept in fp32. Updated every step; applied before export.
     ema_state: dict | None = None
@@ -1194,14 +1325,13 @@ def main() -> None:
     # Optimizer split:
     # - token embedding (Adam) uses EMBED_LR
     # - untied lm_head (Adam) uses HEAD_LR
-    # - matrix params in transformer blocks use MATRIX_LR via Muon
+    # - parameter banks (3D tensors) use MATRIX_LR via Parallel Muon (RS/AG)
     # - vectors/scalars use SCALAR_LR via Adam
+    # [CHANGE: Parameter Banking] Banks go to Muon; per-block scalar params go to AdamW.
+    bank_params = [base_model.qo_bank, base_model.kv_bank, base_model.mlp_up_bank, base_model.mlp_down_bank]
+    bank_ids = {id(p) for p in bank_params}
+    replicated_params = [p for p in base_model.parameters() if id(p) not in bank_ids]
     block_named_params = list(base_model.blocks.named_parameters())
-    matrix_params = [
-        p
-        for name, p in block_named_params
-        if p.ndim == 2 and not any(pattern in name for pattern in CONTROL_TENSOR_NAME_PATTERNS)
-    ]
     scalar_params = [
         p
         for name, p in block_named_params
@@ -1230,10 +1360,11 @@ def main() -> None:
         fused=True,
     )
     optimizer_muon = Muon(
-        matrix_params,
+        bank_params,
         lr=args.matrix_lr,
         momentum=args.muon_momentum,
         backend_steps=args.muon_backend_steps,
+        weight_decay=args.muon_weight_decay,
     )
     for group in optimizer_muon.param_groups:
         group["base_lr"] = args.matrix_lr
@@ -1290,7 +1421,7 @@ def main() -> None:
         if max_wallclock_ms is None:
             warmdown_start = max(args.iterations - args.warmdown_iters, 0)
             return max((args.iterations - step) / max(args.warmdown_iters, 1), 0.0) if warmdown_start <= step < args.iterations else 1.0
-        step_ms = elapsed_ms / max(step, 1)
+        step_ms = elapsed_ms / max(step, 2)   # skip step-1 estimate; it includes any residual JIT
         warmdown_ms = args.warmdown_iters * step_ms
         remaining_ms = max(max_wallclock_ms - elapsed_ms, 0.0)
         return remaining_ms / max(warmdown_ms, 1e-9) if remaining_ms <= warmdown_ms else 1.0
@@ -1304,14 +1435,20 @@ def main() -> None:
         for warmup_step in range(args.warmup_steps):
             zero_grad_all()
             for micro_step in range(grad_accum_steps):
-                if distributed:
-                    model.require_backward_grad_sync = micro_step == grad_accum_steps - 1
                 x, y = train_loader.next_batch(args.train_batch_tokens, args.train_seq_len, grad_accum_steps)
                 with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
                     warmup_loss = model(x, y)
                 (warmup_loss * grad_scale).backward()
+            # Mirror training loop exactly so torch.compile primes all paths including RS/AG
+            optimizer_muon.launch_reduce_scatters() if distributed else None
+            if distributed:
+                ar_works = [dist.all_reduce(p.grad, op=dist.ReduceOp.AVG, async_op=True)
+                            for p in replicated_params if p.grad is not None]
+                for w in ar_works: w.wait()
             for opt in optimizers:
-                opt.step()
+                if opt is not optimizer_muon:
+                    opt.step()
+            optimizer_muon.step()
             zero_grad_all()
             if args.warmup_steps <= 20 or (warmup_step + 1) % 10 == 0 or warmup_step + 1 == args.warmup_steps:
                 log0(f"warmup_step:{warmup_step + 1}/{args.warmup_steps}")
@@ -1319,8 +1456,6 @@ def main() -> None:
         for opt, state in zip(optimizers, initial_optimizer_states, strict=True):
             opt.load_state_dict(state)
         zero_grad_all()
-        if distributed:
-            model.require_backward_grad_sync = True
         train_loader = DistributedTokenLoader(args.train_files, rank, world_size, device)
 
     # -----------------------------
@@ -1372,22 +1507,15 @@ def main() -> None:
         elapsed_ms = training_time_ms + 1000.0 * (time.perf_counter() - t0)
         scale = lr_mul(step, elapsed_ms)
 
-        # [CHANGE: QAT] Enable fake-quantization once LR has decayed to the threshold fraction.
-        # Doing this late (during warmdown) lets the model first learn good weights at full
-        # precision, then spend the final phase adapting to int6 noise. This closes the gap
-        # between pre-quant and post-quant BPB from ~2.0 to ~0.03.
+        # [CHANGE: QAT] Enable bank fake-quantization once LR decays to the threshold.
         if args.qat_enabled and not qat_active and scale < args.late_qat_threshold:
-            for module in base_model.modules():
-                if isinstance(module, CastedLinear):
-                    module._qat = True
+            base_model._qat_active = True
             qat_active = True
             log0(f"qat_activated step:{step} lr_scale:{scale:.4f}")
 
         zero_grad_all()
         train_loss = torch.zeros((), device=device)
         for micro_step in range(grad_accum_steps):
-            if distributed:
-                model.require_backward_grad_sync = micro_step == grad_accum_steps - 1
             x, y = train_loader.next_batch(args.train_batch_tokens, args.train_seq_len, grad_accum_steps)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
                 loss = model(x, y)
@@ -1406,16 +1534,21 @@ def main() -> None:
 
         if args.grad_clip_norm > 0:
             torch.nn.utils.clip_grad_norm_(base_model.parameters(), args.grad_clip_norm)
+
+        # [CHANGE: Parallel Muon] 3-phase step: launch RS for banks → all-reduce small params → wait RS + NS5 + AG
+        # Phase 1: async RS for banks (biggest first, launched before any sync work)
+        optimizer_muon.launch_reduce_scatters() if distributed else None
+        # Phase 2: all-reduce replicated (small) params with AVG while RS in-flight
+        if distributed:
+            ar_works = [dist.all_reduce(p.grad, op=dist.ReduceOp.AVG, async_op=True)
+                        for p in replicated_params if p.grad is not None]
+            for w in ar_works:
+                w.wait()
         for opt in optimizers:
-            opt.step()
-        # [CHANGE: Weight Decay] Muon doesn't support weight decay natively, so we apply it as a
-        # separate decoupled step: p *= (1 - lr * wd). Using the current (scaled) lr means the
-        # effective decay also follows the lr schedule, which is the correct decoupled formulation.
-        if args.muon_weight_decay > 0:
-            with torch.no_grad():
-                muon_lr = optimizer_muon.param_groups[0]["lr"]
-                for p in matrix_params:
-                    p.mul_(1.0 - muon_lr * args.muon_weight_decay)
+            if opt is not optimizer_muon:
+                opt.step()
+        # Phase 3: wait RS, NS5 on 3D shard (per-matrix), AG — WD applied inside Muon.step()
+        optimizer_muon.step()
 
         # [CHANGE: EMA] Update shadow weights with warmup-corrected decay.
         # Early steps use a lower effective decay so EMA catches up to the real weights faster,
@@ -1492,9 +1625,11 @@ def main() -> None:
         log0(f"Code size: {code_bytes} bytes")
         log0(f"Total submission size: {model_bytes + code_bytes} bytes")
 
-    # [CHANGE: FP16 Embeddings + Int6 Quantization] Pass new options to the quantizer.
+    # [CHANGE: Parameter Banking + FP16 Embeddings + Int6] Unbank before quantizing so the quantizer
+    # can find weights under their expected per-layer block.X names.
+    export_state = unbank_state_dict(base_model.state_dict(), args.num_layers)
     quant_obj, quant_stats = quantize_state_dict_int8(
-        base_model.state_dict(),
+        export_state,
         fp16_embed=args.fp16_embed_export and args.tie_embeddings,
         int6_layer_start=args.int6_layer_start,
         int6_layer_end=args.int6_layer_end,
@@ -1521,7 +1656,8 @@ def main() -> None:
     with open("final_model.quant.ptz", "rb") as f:
         quant_blob_disk = f.read()
     quant_state = torch.load(io.BytesIO(zlib.decompress(quant_blob_disk)), map_location="cpu")
-    base_model.load_state_dict(dequantize_state_dict_int8(quant_state), strict=True)
+    dequant = dequantize_state_dict_int8(quant_state)
+    base_model.load_state_dict(rebank_state_dict(dequant, args.num_layers), strict=True)
     torch.cuda.synchronize()
     t_qeval = time.perf_counter()
     q_val_loss, q_val_bpb = eval_val(
