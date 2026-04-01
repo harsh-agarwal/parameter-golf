@@ -1,0 +1,459 @@
+W0329 12:42:09.110000 998704 torch/distributed/run.py:793] 
+W0329 12:42:09.110000 998704 torch/distributed/run.py:793] *****************************************
+W0329 12:42:09.110000 998704 torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0329 12:42:09.110000 998704 torch/distributed/run.py:793] *****************************************
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998770 [0] NCCL INFO Bootstrap : Using eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998770 [0] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998770 [0] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin symbol (>= v5). ncclCollNetPlugin symbols v4 and lower are not supported.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998770 [0] NCCL INFO cudaDriverVersion 13000
+NCCL version 2.21.5+cuda12.4
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998773 [3] NCCL INFO cudaDriverVersion 13000
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998773 [3] NCCL INFO Bootstrap : Using eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998773 [3] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998773 [3] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin symbol (>= v5). ncclCollNetPlugin symbols v4 and lower are not supported.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998771 [1] NCCL INFO cudaDriverVersion 13000
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998771 [1] NCCL INFO Bootstrap : Using eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998772 [2] NCCL INFO cudaDriverVersion 13000
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998772 [2] NCCL INFO Bootstrap : Using eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998771 [1] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998771 [1] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin symbol (>= v5). ncclCollNetPlugin symbols v4 and lower are not supported.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998772 [2] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998772 [2] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin symbol (>= v5). ncclCollNetPlugin symbols v4 and lower are not supported.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.11.0-aws
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Using Libfabric version 1.22
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Using CUDA driver version 13000
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Configuring AWS-specific options
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Setting NCCL_NET_FORCE_FLUSH=0 for Hopper GPUs
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Setting NCCL_NVLSTREE_MAX_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Setting NCCL_NVLS_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Internode latency set at 75.0 us
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Creating one domain per process
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/OFI Using transport protocol RDMA
+libfabric:998770:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+libfabric:998770:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] nccl_net_ofi_rdma_init:6236 NCCL WARN NET/OFI OFI fi_getinfo() call failed: No data available
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] nccl_net_ofi_create_plugin:213 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] nccl_net_ofi_create_plugin:259 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/IB : No device found.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NET/Socket : Using [0]eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Using non-device net plugin version 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Using network Socket
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.11.0-aws
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Using Libfabric version 1.22
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Using CUDA driver version 13000
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Configuring AWS-specific options
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Setting NCCL_NET_FORCE_FLUSH=0 for Hopper GPUs
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Setting NCCL_NVLSTREE_MAX_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Setting NCCL_NVLS_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Internode latency set at 75.0 us
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Creating one domain per process
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/OFI Using transport protocol RDMA
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.11.0-aws
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Using Libfabric version 1.22
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Using CUDA driver version 13000
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Configuring AWS-specific options
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Setting NCCL_NET_FORCE_FLUSH=0 for Hopper GPUs
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Setting NCCL_NVLSTREE_MAX_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Setting NCCL_NVLS_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Internode latency set at 75.0 us
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Creating one domain per process
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/OFI Using transport protocol RDMA
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.11.0-aws
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Using Libfabric version 1.22
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Using CUDA driver version 13000
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Configuring AWS-specific options
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Setting NCCL_NET_FORCE_FLUSH=0 for Hopper GPUs
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Setting NCCL_NVLSTREE_MAX_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Setting NCCL_NVLS_CHUNKSIZE to 512KiB
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Internode latency set at 75.0 us
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Creating one domain per process
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/OFI Using transport protocol RDMA
+libfabric:998771:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+libfabric:998773:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+libfabric:998771:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] nccl_net_ofi_rdma_init:6236 NCCL WARN NET/OFI OFI fi_getinfo() call failed: No data available
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] nccl_net_ofi_create_plugin:213 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] nccl_net_ofi_create_plugin:259 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/IB : No device found.
+libfabric:998773:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NET/Socket : Using [0]eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Using non-device net plugin version 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Using network Socket
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] nccl_net_ofi_rdma_init:6236 NCCL WARN NET/OFI OFI fi_getinfo() call failed: No data available
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] nccl_net_ofi_create_plugin:213 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] nccl_net_ofi_create_plugin:259 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/IB : No device found.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NET/Socket : Using [0]eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Using non-device net plugin version 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Using network Socket
+libfabric:998772:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+libfabric:998772:1774813335::core:core:cuda_gdrcopy_hmem_init():192<warn> gdrcopy_dl_hmem_init failed!
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] nccl_net_ofi_rdma_init:6236 NCCL WARN NET/OFI OFI fi_getinfo() call failed: No data available
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] nccl_net_ofi_create_plugin:213 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] nccl_net_ofi_create_plugin:259 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/IB : No device found.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NET/Socket : Using [0]eth0:10.91.225.148<0>
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Using non-device net plugin version 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Using network Socket
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO ncclCommInitRank comm 0x55a813533640 rank 1 nranks 4 cudaDev 1 nvmlDev 1 busId 64000 commId 0x857a8c68ec4c976a - Init START
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO ncclCommInitRank comm 0x559a9ba7fdd0 rank 3 nranks 4 cudaDev 3 nvmlDev 3 busId 86000 commId 0x857a8c68ec4c976a - Init START
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO ncclCommInitRank comm 0x55882c5fe230 rank 2 nranks 4 cudaDev 2 nvmlDev 2 busId 75000 commId 0x857a8c68ec4c976a - Init START
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO ncclCommInitRank comm 0x56337ff67bc0 rank 0 nranks 4 cudaDev 0 nvmlDev 0 busId 53000 commId 0x857a8c68ec4c976a - Init START
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO MNNVL busId 0x64000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO MNNVL busId 0x53000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO MNNVL busId 0x75000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO MNNVL busId 0x86000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Setting affinity for GPU 1 to ffff,ffffffff,00000000,0000ffff,ffffffff
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NVLS multicast support is available on dev 1
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Setting affinity for GPU 2 to ffff,ffffffff,00000000,0000ffff,ffffffff
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NVLS multicast support is available on dev 2
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Setting affinity for GPU 0 to ffff,ffffffff,00000000,0000ffff,ffffffff
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Setting affinity for GPU 3 to ffff,ffffffff,00000000,0000ffff,ffffffff
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NVLS multicast support is available on dev 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NVLS multicast support is available on dev 3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO comm 0x559a9ba7fdd0 rank 3 nRanks 4 nNodes 1 localRanks 4 localRank 3 MNNVL 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO comm 0x55882c5fe230 rank 2 nRanks 4 nNodes 1 localRanks 4 localRank 2 MNNVL 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO comm 0x55a813533640 rank 1 nRanks 4 nNodes 1 localRanks 4 localRank 1 MNNVL 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO comm 0x56337ff67bc0 rank 0 nRanks 4 nNodes 1 localRanks 4 localRank 0 MNNVL 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 00/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 01/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Trees [0] -1/-1/-1->3->2 [1] -1/-1/-1->3->2 [2] -1/-1/-1->3->2 [3] -1/-1/-1->3->2 [4] -1/-1/-1->3->2 [5] -1/-1/-1->3->2 [6] -1/-1/-1->3->2 [7] -1/-1/-1->3->2 [8] -1/-1/-1->3->2 [9] -1/-1/-1->3->2 [10] -1/-1/-1->3->2 [11] -1/-1/-1->3->2 [12] -1/-1/-1->3->2 [13] -1/-1/-1->3->2 [14] -1/-1/-1->3->2 [15] -1/-1/-1->3->2 [16] -1/-1/-1->3->2 [17] -1/-1/-1->3->2 [18] -1/-1/-1->3->2 [19] -1/-1/-1->3->2 [20] -1/-1/-1->3->2 [21] -1/-1/-1->3->2 [22] -1/-1/-1->3->2 [23] -1/-1/-1->3->2
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Trees [0] 3/-1/-1->2->1 [1] 3/-1/-1->2->1 [2] 3/-1/-1->2->1 [3] 3/-1/-1->2->1 [4] 3/-1/-1->2->1 [5] 3/-1/-1->2->1 [6] 3/-1/-1->2->1 [7] 3/-1/-1->2->1 [8] 3/-1/-1->2->1 [9] 3/-1/-1->2->1 [10] 3/-1/-1->2->1 [11] 3/-1/-1->2->1 [12] 3/-1/-1->2->1 [13] 3/-1/-1->2->1 [14] 3/-1/-1->2->1 [15] 3/-1/-1->2->1 [16] 3/-1/-1->2->1 [17] 3/-1/-1->2->1 [18] 3/-1/-1->2->1 [19] 3/-1/-1->2->1 [20] 3/-1/-1->2->1 [21] 3/-1/-1->2->1 [22] 3/-1/-1->2->1 [23] 3/-1/-1->2->1
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Trees [0] 2/-1/-1->1->0 [1] 2/-1/-1->1->0 [2] 2/-1/-1->1->0 [3] 2/-1/-1->1->0 [4] 2/-1/-1->1->0 [5] 2/-1/-1->1->0 [6] 2/-1/-1->1->0 [7] 2/-1/-1->1->0 [8] 2/-1/-1->1->0 [9] 2/-1/-1->1->0 [10] 2/-1/-1->1->0 [11] 2/-1/-1->1->0 [12] 2/-1/-1->1->0 [13] 2/-1/-1->1->0 [14] 2/-1/-1->1->0 [15] 2/-1/-1->1->0 [16] 2/-1/-1->1->0 [17] 2/-1/-1->1->0 [18] 2/-1/-1->1->0 [19] 2/-1/-1->1->0 [20] 2/-1/-1->1->0 [21] 2/-1/-1->1->0 [22] 2/-1/-1->1->0 [23] 2/-1/-1->1->0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 02/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO P2P Chunksize set to 524288
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO P2P Chunksize set to 524288
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO P2P Chunksize set to 524288
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 03/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 04/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 05/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 06/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 07/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 08/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 09/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 10/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 11/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 12/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 13/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 14/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 15/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 16/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 17/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 18/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 19/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 20/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 21/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 22/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 23/24 :    0   1   2   3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1 [2] 1/-1/-1->0->-1 [3] 1/-1/-1->0->-1 [4] 1/-1/-1->0->-1 [5] 1/-1/-1->0->-1 [6] 1/-1/-1->0->-1 [7] 1/-1/-1->0->-1 [8] 1/-1/-1->0->-1 [9] 1/-1/-1->0->-1 [10] 1/-1/-1->0->-1 [11] 1/-1/-1->0->-1 [12] 1/-1/-1->0->-1 [13] 1/-1/-1->0->-1 [14] 1/-1/-1->0->-1 [15] 1/-1/-1->0->-1 [16] 1/-1/-1->0->-1 [17] 1/-1/-1->0->-1 [18] 1/-1/-1->0->-1 [19] 1/-1/-1->0->-1 [20] 1/-1/-1->0->-1 [21] 1/-1/-1->0->-1 [22] 1/-1/-1->0->-1 [23] 1/-1/-1->0->-1
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO P2P Chunksize set to 524288
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 00/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 01/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 02/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 03/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 04/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 05/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 06/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 07/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 08/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 09/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 10/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 11/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 00/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 12/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 01/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 13/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 02/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 14/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 00/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 03/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 15/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 01/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 04/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 02/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 16/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 03/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 05/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 00/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 17/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 04/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 06/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 01/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 05/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 18/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 07/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 19/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 06/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 02/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 08/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 20/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 07/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 03/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 21/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 09/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 08/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 04/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 22/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 09/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 10/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 05/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 10/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 23/0 : 3[3] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 11/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 11/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 06/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 12/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 12/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 07/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 13/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 13/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 08/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 14/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 14/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 09/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 15/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 15/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 10/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 16/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 16/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 11/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 17/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 17/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 12/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 18/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 13/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 18/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 19/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 14/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 19/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 20/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 15/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 20/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 21/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 16/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 21/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 22/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 17/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 22/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 23/0 : 1[1] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 18/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 23/0 : 2[2] -> 3[3] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 19/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 20/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 21/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 22/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Channel 23/0 : 0[0] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Connected all rings
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Connected all rings
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Connected all rings
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 00/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Connected all rings
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 01/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 02/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 03/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 04/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 05/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 06/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 07/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 08/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 09/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 10/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 11/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 12/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 13/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 14/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 15/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 16/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 17/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 18/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 19/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 20/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 21/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 00/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 22/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 00/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 01/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Channel 23/0 : 3[3] -> 2[2] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 01/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 02/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 03/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 02/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 03/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 04/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 04/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 05/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 05/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 06/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 06/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 07/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 07/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 08/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 08/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 09/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 09/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 10/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 10/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 11/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 11/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 12/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 12/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 13/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 13/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 14/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 14/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 15/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 15/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 16/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 16/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 17/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 17/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 18/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 18/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 19/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 19/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 20/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 20/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 21/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 21/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 22/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 22/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Channel 23/0 : 2[2] -> 1[1] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Channel 23/0 : 1[1] -> 0[0] via P2P/CUMEM
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO Connected all trees
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO Connected all trees
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO Connected all trees
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO Connected all trees
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NCCL_NVLS_CHUNKSIZE set by environment to 524288.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO NVLS comm 0x559a9ba7fdd0 headRank 3 nHeads 4 buffSize 4194304 memSize 2097152 nvlsPerRankSize 301989888 nvlsTotalSize 1207959552
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NCCL_NVLS_CHUNKSIZE set by environment to 524288.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO NVLS comm 0x55a813533640 headRank 1 nHeads 4 buffSize 4194304 memSize 2097152 nvlsPerRankSize 301989888 nvlsTotalSize 1207959552
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NCCL_NVLS_CHUNKSIZE set by environment to 524288.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO NVLS comm 0x55882c5fe230 headRank 2 nHeads 4 buffSize 4194304 memSize 2097152 nvlsPerRankSize 301989888 nvlsTotalSize 1207959552
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NCCL_NVLS_CHUNKSIZE set by environment to 524288.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO NVLS comm 0x56337ff67bc0 headRank 0 nHeads 4 buffSize 4194304 memSize 2097152 nvlsPerRankSize 301989888 nvlsTotalSize 1207959552
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO threadThresholds 8/8/64 | 32/8/64 | 512 | 512
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO threadThresholds 8/8/64 | 32/8/64 | 512 | 512
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO threadThresholds 8/8/64 | 32/8/64 | 512 | 512
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO threadThresholds 8/8/64 | 32/8/64 | 512 | 512
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO TUNER/Plugin: Failed to find ncclTunerPlugin_v2, using internal tuner instead.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO TUNER/Plugin: Failed to find ncclTunerPlugin_v2, using internal tuner instead.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:998859 [3] NCCL INFO ncclCommInitRank comm 0x559a9ba7fdd0 rank 3 nranks 4 cudaDev 3 nvmlDev 3 busId 86000 commId 0x857a8c68ec4c976a - Init COMPLETE
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:998861 [1] NCCL INFO ncclCommInitRank comm 0x55a813533640 rank 1 nranks 4 cudaDev 1 nvmlDev 1 busId 64000 commId 0x857a8c68ec4c976a - Init COMPLETE
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO TUNER/Plugin: Failed to find ncclTunerPlugin_v2, using internal tuner instead.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:998863 [2] NCCL INFO ncclCommInitRank comm 0x55882c5fe230 rank 2 nranks 4 cudaDev 2 nvmlDev 2 busId 75000 commId 0x857a8c68ec4c976a - Init COMPLETE
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO TUNER/Plugin: Failed to find ncclTunerPlugin_v2, using internal tuner instead.
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:998841 [0] NCCL INFO ncclCommInitRank comm 0x56337ff67bc0 rank 0 nranks 4 cudaDev 0 nvmlDev 0 busId 53000 commId 0x857a8c68ec4c976a - Init COMPLETE
+logs/11L_mlp2.txt
+val_bpb:enabled tokenizer_kind=sentencepiece tokenizer_path=./data/tokenizers/fineweb_1024_bpe.model
+train_loader:dataset:fineweb10B_sp1024 train_shards:10
+val_loader:shards pattern=./data/datasets/fineweb10B_sp1024/fineweb_val_*.bin tokens:62021632
+model_params:21062233
+world_size:4 grad_accum_steps:2
+sdp_backends:cudnn=False flash=True mem_efficient=False math=False
+attention_mode:gqa num_heads:8 num_kv_heads:4
+tie_embeddings:True embed_lr:0.025 head_lr:0.0 matrix_lr:0.03 scalar_lr:0.025
+train_batch_tokens:786432 train_seq_len:2048 iterations:20000 warmup_steps:20 max_wallclock_seconds:600.000
+seed:1337
+warmup_step:1/20
+warmup_step:2/20
+warmup_step:3/20
+warmup_step:4/20
+warmup_step:5/20
+warmup_step:6/20
+warmup_step:7/20
+warmup_step:8/20
+warmup_step:9/20
+warmup_step:10/20
+warmup_step:11/20
+warmup_step:12/20
+warmup_step:13/20
+warmup_step:14/20
+warmup_step:15/20
+warmup_step:16/20
+warmup_step:17/20
+warmup_step:18/20
+warmup_step:19/20
+warmup_step:20/20
+step:0/20000 val_loss:6.9347 val_bpb:4.1071 train_time:0ms step_avg:0.02ms
+step:1/20000 train_loss:6.9351 train_time:245ms step_avg:244.84ms
+step:2/20000 train_loss:8.4067 train_time:367ms step_avg:183.56ms
+step:3/20000 train_loss:6.3536 train_time:560ms step_avg:186.83ms
+step:4/20000 train_loss:5.9554 train_time:754ms step_avg:188.40ms
+step:5/20000 train_loss:5.8595 train_time:946ms step_avg:189.28ms
+step:6/20000 train_loss:5.5585 train_time:1139ms step_avg:189.80ms
+step:7/20000 train_loss:5.2412 train_time:1331ms step_avg:190.21ms
+step:8/20000 train_loss:4.9992 train_time:1524ms step_avg:190.51ms
+step:9/20000 train_loss:4.8698 train_time:1717ms step_avg:190.76ms
+step:10/20000 train_loss:4.7351 train_time:1910ms step_avg:191.01ms
+step:200/20000 train_loss:2.5418 train_time:38687ms step_avg:193.44ms
+step:200/20000 val_loss:2.6914 val_bpb:1.5940 train_time:38762ms step_avg:193.81ms
+step:400/20000 train_loss:2.4258 train_time:77784ms step_avg:194.46ms
+step:400/20000 val_loss:2.4278 val_bpb:1.4379 train_time:77859ms step_avg:194.65ms
+step:600/20000 train_loss:2.3565 train_time:116774ms step_avg:194.62ms
+step:600/20000 val_loss:2.3259 val_bpb:1.3775 train_time:116850ms step_avg:194.75ms
+step:800/20000 train_loss:2.2456 train_time:155770ms step_avg:194.71ms
+step:800/20000 val_loss:2.2689 val_bpb:1.3438 train_time:155845ms step_avg:194.81ms
+step:1000/20000 train_loss:2.2816 train_time:194855ms step_avg:194.85ms
+step:1000/20000 val_loss:2.2358 val_bpb:1.3241 train_time:194930ms step_avg:194.93ms
+step:1200/20000 train_loss:2.2784 train_time:233989ms step_avg:194.99ms
+step:1200/20000 val_loss:2.2094 val_bpb:1.3085 train_time:234064ms step_avg:195.05ms
+step:1400/20000 train_loss:2.2126 train_time:273033ms step_avg:195.02ms
+step:1400/20000 val_loss:2.1872 val_bpb:1.2954 train_time:273108ms step_avg:195.08ms
+step:1600/20000 train_loss:2.1716 train_time:312037ms step_avg:195.02ms
+step:1600/20000 val_loss:2.1710 val_bpb:1.2858 train_time:312112ms step_avg:195.07ms
+step:1800/20000 train_loss:2.1496 train_time:351220ms step_avg:195.12ms
+step:1800/20000 val_loss:2.1468 val_bpb:1.2714 train_time:351294ms step_avg:195.16ms
+step:2000/20000 train_loss:2.1036 train_time:390279ms step_avg:195.14ms
+step:2000/20000 val_loss:2.1270 val_bpb:1.2597 train_time:390354ms step_avg:195.18ms
+step:2200/20000 train_loss:2.1758 train_time:429360ms step_avg:195.16ms
+step:2200/20000 val_loss:2.1079 val_bpb:1.2484 train_time:429435ms step_avg:195.20ms
+step:2400/20000 train_loss:2.0938 train_time:468408ms step_avg:195.17ms
+step:2400/20000 val_loss:2.0904 val_bpb:1.2381 train_time:468483ms step_avg:195.20ms
+qat_activated step:2574 lr_scale:0.2497
+step:2600/20000 train_loss:2.0755 train_time:537635ms step_avg:206.78ms
+step:2600/20000 val_loss:2.0791 val_bpb:1.2313 train_time:537709ms step_avg:206.81ms
+step:2800/20000 train_loss:2.0746 train_time:576562ms step_avg:205.91ms
+step:2800/20000 val_loss:2.0703 val_bpb:1.2261 train_time:576636ms step_avg:205.94ms
+step:2921/20000 val_loss:2.0683 val_bpb:1.2250 train_time:600249ms step_avg:205.49ms
+stopping_early: wallclock_cap train_time:600249ms step:2921/20000
+peak memory allocated: 23765 MiB reserved: 24440 MiB
+swa_applied: averaged 7 snapshots for export
+Serialized model: 42324955 bytes
+Code size: 79968 bytes
+Total submission size: 42404923 bytes
+Serialized model (int6+fp16_emb)+zlib: 14663700 bytes (payload:21799266 raw_torch:21854790 payload_ratio:1.94x)
+Total submission size (int6+fp16_emb)+zlib: 14743668 bytes
+/home/colligo/parameter-golf/train_gpt.py:1658: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  quant_state = torch.load(io.BytesIO(zlib.decompress(quant_blob_disk)), map_location="cpu")
+/home/colligo/parameter-golf/train_gpt.py:1658: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  quant_state = torch.load(io.BytesIO(zlib.decompress(quant_blob_disk)), map_location="cpu")
+/home/colligo/parameter-golf/train_gpt.py:1658: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  quant_state = torch.load(io.BytesIO(zlib.decompress(quant_blob_disk)), map_location="cpu")
+/home/colligo/parameter-golf/train_gpt.py:1658: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  quant_state = torch.load(io.BytesIO(zlib.decompress(quant_blob_disk)), map_location="cpu")
+final_quant_zlib_roundtrip val_loss:2.0781 val_bpb:1.2308 eval_time:4131ms
+final_quant_zlib_roundtrip_exact val_loss:2.07810168 val_bpb:1.23076887
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:999099 [2] NCCL INFO [Service thread] Connection closed by localRank 2
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:999093 [3] NCCL INFO [Service thread] Connection closed by localRank 3
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:999095 [1] NCCL INFO [Service thread] Connection closed by localRank 1
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:999097 [0] NCCL INFO [Service thread] Connection closed by localRank 0
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998770:1004316 [0] NCCL INFO comm 0x56337ff67bc0 rank 0 nranks 4 cudaDev 0 busId 53000 - Abort COMPLETE
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998773:1004315 [3] NCCL INFO comm 0x559a9ba7fdd0 rank 3 nranks 4 cudaDev 3 busId 86000 - Abort COMPLETE
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998772:1004314 [2] NCCL INFO comm 0x55882c5fe230 rank 2 nranks 4 cudaDev 2 busId 75000 - Abort COMPLETE
+pluto-prod-haagarwal-test-4gpu-llm-4-0-56lj1f:998771:1004313 [1] NCCL INFO comm 0x55a813533640 rank 1 nranks 4 cudaDev 1 busId 64000 - Abort COMPLETE

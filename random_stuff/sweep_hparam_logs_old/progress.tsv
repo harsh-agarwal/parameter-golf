@@ -1,0 +1,37 @@
+timestamp	name	status	val_loss	overrides
+2026-03-27 22:27:32	baseline	started		
+2026-03-27 22:27:49	baseline	failed(exit=120)	partial	
+2026-03-27 22:27:49	lr_matrix_low	started		MATRIX_LR=0.02 SCALAR_LR=0.02
+2026-03-27 22:28:25	baseline	started		
+2026-03-27 22:40:54	baseline	done	2.1135	
+2026-03-27 22:40:54	lr_matrix_low	started		MATRIX_LR=0.02 SCALAR_LR=0.02
+2026-03-27 22:53:32	lr_matrix_low	done	2.1150	MATRIX_LR=0.02 SCALAR_LR=0.02
+2026-03-27 22:53:32	lr_matrix_high	started		MATRIX_LR=0.03 SCALAR_LR=0.03
+2026-03-27 23:06:14	lr_matrix_high	done	2.1163	MATRIX_LR=0.03 SCALAR_LR=0.03
+2026-03-27 23:06:14	lr_embed_low	started		TIED_EMBED_LR=0.025
+2026-03-27 23:18:42	lr_embed_low	done	2.1148	TIED_EMBED_LR=0.025
+2026-03-27 23:18:42	lr_embed_high	started		TIED_EMBED_LR=0.05
+2026-03-27 23:31:12	lr_embed_high	done	2.1199	TIED_EMBED_LR=0.05
+2026-03-27 23:31:12	warmdown_long	started		WARMDOWN_ITERS=1500
+2026-03-27 23:43:41	warmdown_long	done	2.1132	WARMDOWN_ITERS=1500
+2026-03-27 23:43:41	warmdown_short	started		WARMDOWN_ITERS=900
+2026-03-27 23:56:12	warmdown_short	done	2.1184	WARMDOWN_ITERS=900
+2026-03-27 23:56:12	grad_clip_tight	started		GRAD_CLIP_NORM=0.2
+2026-03-28 00:08:41	grad_clip_tight	done	2.1144	GRAD_CLIP_NORM=0.2
+2026-03-28 00:08:41	grad_clip_off	started		GRAD_CLIP_NORM=0.0
+2026-03-28 00:21:10	grad_clip_off	done	2.1191	GRAD_CLIP_NORM=0.0
+2026-03-28 00:21:10	qk_gain_low	started		QK_GAIN_INIT=1.0
+2026-03-28 00:33:36	qk_gain_low	done	2.1145	QK_GAIN_INIT=1.0
+2026-03-28 00:33:36	qk_gain_high	started		QK_GAIN_INIT=2.0
+2026-03-28 00:46:02	qk_gain_high	done	2.1159	QK_GAIN_INIT=2.0
+2026-03-28 00:46:02	beta2_high	started		BETA2=0.99
+2026-03-28 00:58:29	beta2_high	done	2.1147	BETA2=0.99
+2026-03-28 00:58:29	softcap_low	started		LOGIT_SOFTCAP=20.0
+2026-03-28 01:11:00	softcap_low	done	2.1143	LOGIT_SOFTCAP=20.0
+2026-03-28 01:11:00	softcap_high	started		LOGIT_SOFTCAP=50.0
+2026-03-28 01:23:28	softcap_high	done	2.1227	LOGIT_SOFTCAP=50.0
+2026-03-28 01:23:29	warmdown_long_phase2	started		WARMDOWN_ITERS=1500
+2026-03-28 01:50:58	warmdown_long_phase2	done	2.0321	WARMDOWN_ITERS=1500
+2026-03-29 04:01:45	mlr_0015	started		MATRIX_LR=0.015
+2026-03-29 04:01:58	mlr_0015	failed(exit=120)	partial	MATRIX_LR=0.015
+2026-03-29 04:01:58	mlr_0020	started		MATRIX_LR=0.020
